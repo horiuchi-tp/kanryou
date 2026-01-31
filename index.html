@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>作業完了報告</title>
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.0/umd/index.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>作業完了報告</h1>
+
+    <div class="form-group">
+      <label for="workDate">完了を報告する日 📅:</label>
+      <input type="date" id="workDate" name="workDate" required>
+    </div>
+
+    <div class="form-group">
+      <label for="staffCode">担当者コード:</label>
+      <input type="text" id="staffCode" name="staffCode" 
+             pattern="^8[0-9]{3,4}$" 
+             title="8から始まる4桁または5桁の数字"
+             placeholder="8xxxx"
+             inputmode="numeric"
+             maxlength="5"
+             required>
+    </div>
+
+    <div class="form-group">
+      <label>本日の工事に変更はありますか？</label>
+      <div class="radio-group notranslate" translate="no">
+        <label><input type="radio" name="hasChange" value="なし" checked> 変更なし</label>
+        <label><input type="radio" name="hasChange" value="あり"> 変更有の場合は下記を記載</label>
+      </div>
+    </div>
+
+    <div id="cancellationDetails" class="hidden">
+      <h2>変更内容詳細</h2>
+      <div id="reportSetsContainer"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="input-label" for="overallComment">報告や詳細コメント:</label>
+      <textarea id="overallComment" name="overallComment" rows="3" placeholder="申し送り事項などがあれば入力してください"></textarea>
+    </div>
+
+    <div class="page-bottom-buttons">
+        <button type="button" id="addSetButton" class="button-common hidden">他受注の変更を報告する</button>
+        </div>
+
+    <div class="credit">株式会社 堀内トランスポート</div>
+  </div>
+
+  <div id="actionButtonsFixed">
+    <button type="button" id="submitReport" class="button-common">完了報告を送信 📤</button>
+    <button type="button" id="showSearchPopup" class="button-common">報告を検索</button>
+  </div>
+
+  <div id="popupOverlay" class="hidden popup-overlay-style">
+    <div id="popupContent" class="popup-content-style">
+      <div id="messageBox" class="message-box"><span id="popupMessage"></span></div>
+      
+        <div id="hankoContainer" class="hidden">
+            <div class="hanko-stamp"><span class="hanko-text">完了</span></div>
+            <p id="hankoMessage"></p>
+        </div>
+        <div id="popupResults"></div>
+        <button type="button" id="closePopup" class="popup-button" style="background:var(--primary-color); margin-top:20px;">閉じる</button>
+    </div>
+  </div>
+
+  <div id="searchPopupOverlay" class="hidden popup-overlay-style">
+    <div class="popup-content-style">
+      <h2>報告を検索</h2>
+      <div class="form-group">
+        <label class="input-label">検索日:</label>
+        <input type="date" id="popupSearchDate">
+      </div>
+      <div class="form-group">
+        <label class="input-label">担当者コード:</label>
+        <input type="text" id="popupSearchStaffCode" inputmode="numeric" pattern="^8[0-9]{3,4}$">
+      </div>
+      <div class="popup-button-area">
+        <button type="button" id="executeSearch" class="popup-button">検索実行</button>
+        <button type="button" id="closeSearchPopup" class="popup-button cancel">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="scanner-popup" class="hidden">
+    <video id="scanner-video" autoplay muted playsinline></video>
+    <div id="scanner-overlay-container">
+        <p id="scanner-overlay-text">バーコードをカメラに向けてください</p>
+        <button id="close-scanner">キャンセル</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
