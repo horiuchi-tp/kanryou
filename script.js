@@ -106,7 +106,7 @@ function addReportSet() {
         <input type="text" name="orderNumber[]" id="orderNumber_${setIndex}" 
                pattern="^([0-9]{6}|[0-9]{15})$" 
                title="6桁または15桁の数字" maxlength="15" 
-               inputmode="numeric" placeholder="8****">
+               inputmode="numeric" placeholder="123456">
         <button type="button" class="camera-btn">📸</button>
       </div>
       <div class="customer-name-display"></div>
