@@ -64,7 +64,6 @@
       white-space: nowrap;
     }
 
-    /* --- フォーム要素 --- */
     .form-group { margin-bottom: 30px; }
 
     label {
@@ -126,12 +125,11 @@
 
     .order-number-group { position: relative; }
     
-    /* ★修正: 受注番号入力欄のみ、文字サイズを小さく調整 */
     .order-number-group input[type="text"] {
       padding-right: 70px;
-      font-size: 1.0em; /* 全体より少し小さく */
-      letter-spacing: -0.05em; /* 文字間隔を少し詰める */
-      font-family: monospace, sans-serif; /* 数字が等幅になるように */
+      font-size: 1.0em; 
+      letter-spacing: -0.05em; 
+      font-family: monospace, sans-serif; 
     }
 
     .order-number-group .camera-btn {
@@ -350,7 +348,6 @@
       pointer-events: auto;
     }
 
-    /* ★非表示クラス */
     .hidden { display: none !important; }
     
     .credit { text-align: center; color: #777; margin-top: 20px; font-size: 0.9em; }
@@ -469,11 +466,12 @@
   </div>
 
   <script>
-    // --- JavaScript ---
+    // ★お客様のGAS WebアプリURLをここに設定します
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby-JjmXn6fktJ4fGg34iUPadhux-MdFDxp_ei83XgWLiW-xdnArfQc2I6DwT0tox0y9/exec';
+
     let isFormDirty = false;
     const formElementsToTrack = ['workDate', 'staffCode'];
     
-    // 要素取得
     const cancellationDetails = document.getElementById('cancellationDetails');
     const reportSetsContainer = document.getElementById('reportSetsContainer');
     const addSetButton = document.getElementById('addSetButton');
@@ -503,8 +501,8 @@
     let currentScannerTargetInput = null;
 
     const maxRows = 50;
-    // ★修正: 報告セクションの最大数を10に設定
     const maxReportSets = 10;
+    
     function markFormDirty() { isFormDirty = true; }
 
     function preparePopup() {
@@ -557,11 +555,9 @@
         addSetButton.classList.toggle('hidden', isHidden);
         
         if (isHidden) {
-            // なしの場合はフォームをリセットして1つだけ用意しておく（非表示）
             reportSetsContainer.innerHTML = '';
             addReportSet(); 
         } else {
-            // ありに切り替わった時、もし空なら1つ追加する
             if (reportSetsContainer.children.length === 0) {
                 addReportSet();
             }
@@ -569,7 +565,6 @@
     }
 
     function addReportSet() {
-        // ★修正: 上限10件のチェック
         if (reportSetsContainer.children.length >= maxReportSets) {
             alert('変更報告は最大10件までです。');
             return;
@@ -580,7 +575,6 @@
         newReportSet.className = 'report-set';
         newReportSet.dataset.customerName = "";
         
-        // ★修正: 区分に「報告だけ」、理由グループに `reason-group` クラスを追加
         newReportSet.innerHTML = `
           <label class="input-label" for="orderNumber_${setIndex}">受注番号下６桁を入力<br>又はカメラでQR受注番号を<br>読み取ってください:</label>
           <div class="order-number-group">
@@ -722,7 +716,6 @@
 
     addSetButton.addEventListener('click', addReportSet);
 
-    // ★修正: 報告だけ選択時の表示切替（理由・行ってない行を非表示）
     function toggleRowInputVisibility(selectElement) {
         const reportSet = selectElement.closest('.report-set');
         const rowSection = reportSet.querySelector('.row-input-section');
@@ -733,18 +726,15 @@
         const isAll = selectElement.value === '全部';
         const isReportOnly = selectElement.value === '報告だけ';
         
-        // 行入力の表示制御 (全部 or 報告だけ の場合は非表示・無効化)
         const hideRowInput = isAll || isReportOnly;
         rowSection.classList.toggle('hidden', hideRowInput);
         inputs.forEach(input => input.disabled = hideRowInput);
 
-        // 理由選択の表示制御 (報告だけ の場合は非表示・無効化)
         if (reasonGroup) {
             reasonGroup.classList.toggle('hidden', isReportOnly);
             reasonSelect.disabled = isReportOnly;
         }
 
-        // 非表示時は行入力のDOMをリセットする
         if (hideRowInput) {
              const container = rowSection.querySelector('.row-container');
              container.innerHTML = ''; 
@@ -798,7 +788,6 @@
                 const scope = set.querySelector('.scope-select').value;
                 const reasonSelect = set.querySelector('.main-reason-select');
                 
-                // ★修正: 報告だけの時は理由は不要なので空文字にする
                 const reason = reasonSelect.disabled ? '' : reasonSelect.value; 
                 const comment = set.querySelector('textarea').value;
                 
@@ -811,7 +800,6 @@
                 if (!orderNum) { showError(set.querySelector('input[name="orderNumber[]"]'), '受注番号を入力してください'); hasError=true; return; }
                 if (!scope) { showError(set.querySelector('.scope-select'), '区分を選択してください'); hasError=true; return; }
                 
-                // ★修正: 報告だけ 以外の場合は理由を必須にする
                 if (scope !== '報告だけ' && !reason) { 
                     showError(reasonSelect, '理由を選択してください'); 
                     hasError=true; return; 
@@ -839,8 +827,24 @@
         submitButton.disabled = true;
         submitButton.textContent = '送信中...';
         
-        google.script.run
-            .withSuccessHandler(() => {
+        // ★修正: デスクトップファイル用に fetch 通信を使用（CORS回避のため text/plain で送信）
+        const payload = {
+            workDate: workDate,
+            staffCode: staffCode,
+            hasChange: hasChange,
+            reports: reportData
+        };
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
                 preparePopup();
                 hankoContainer.classList.remove('hidden');
                 popupContent.classList.add('hanko-success');
@@ -850,22 +854,19 @@
                 submitButton.textContent = '完了報告を送信 📤';
                 isFormDirty = false;
                 resetFormFields(); 
-            })
-            .withFailureHandler((e) => {
-                preparePopup();
-                popupContent.classList.add('error');
-                popupMessage.textContent = '送信に失敗しました。';
-                popupOverlay.classList.remove('hidden');
-                submitButton.disabled = false;
-                submitButton.textContent = '完了報告を送信 📤';
-                console.error(e);
-            })
-            .processReport({
-                workDate: workDate,
-                staffCode: staffCode,
-                hasChange: hasChange,
-                reports: reportData
-            });
+            } else {
+                throw new Error(data.message || '送信に失敗しました');
+            }
+        })
+        .catch((e) => {
+            preparePopup();
+            popupContent.classList.add('error');
+            popupMessage.textContent = `送信エラー: ${e.message}`;
+            popupOverlay.classList.remove('hidden');
+            submitButton.disabled = false;
+            submitButton.textContent = '完了報告を送信 📤';
+            console.error(e);
+        });
     });
 
     resetButton.addEventListener('click', () => { confirmPopupOverlay.classList.remove('hidden'); });
@@ -916,13 +917,23 @@
         popupMessage.textContent = '検索中...';
         popupOverlay.classList.remove('hidden');
         
-        google.script.run
-            .withSuccessHandler(displaySearchResults)
-            .withFailureHandler(() => {
-                popupMessage.textContent = '検索エラー';
-                popupContent.classList.add('error');
-            })
-            .getReports({date: date, staffCode: code});
+        // ★修正: デスクトップファイル用に fetch 通信を使用
+        const targetUrl = `${WEB_APP_URL}?action=search&date=${date}&staffCode=${code}`;
+        
+        fetch(targetUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                displaySearchResults(data.data);
+            } else {
+                throw new Error(data.message || '検索に失敗しました');
+            }
+        })
+        .catch((e) => {
+            popupMessage.textContent = `検索エラー: ${e.message}`;
+            popupContent.classList.add('error');
+            console.error(e);
+        });
     });
 
     function displaySearchResults(results) {
