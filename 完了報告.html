@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>作業完了報告</title>
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.0/umd/index.min.js"></script>
+  <style>
+    /* --- 基本設定 --- */
+    :root {
+      --primary-color: #004098;
+      --light-accent-color: #FFB74D;
+      --light-danger-color: #E57373;
+      --light-blue-color: #90CAF9;
+      --text-color: #333333;
+      --text-black: #000000;
+      --border-color: #333333; 
+      --input-focus-bg: #fff9c4;
+      --white-color: #ffffff;
+      --danger-color: #dc3545;
+      --light-gray-bg: #f8f9fa;
+      --fixed-footer-height-spacer: 130px; 
+    }
+
+    body {
+      font-size: clamp(16px, 6vw, 29px);
+      font-family: "游ゴシック体", YuGothic, sans-serif;
+      margin: 0;
+      padding: 0 0 var(--fixed-footer-height-spacer) 0;
+      background-color: var(--light-gray-bg);
+      color: var(--text-color);
+      line-height: 1.5;
+      overflow-x: hidden;
+      width: 100vw;
+    }
+
+    .container {
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 15px 40px 15px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 8vw, 3em);
+      text-align: center;
+      color: var(--primary-color);
+      margin-bottom: 30px;
+      font-weight: bold;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    h2 {
+      font-size: clamp(1.2rem, 5vw, 1.5em);
+      color: var(--primary-color);
+      margin-top: 30px;
+      margin-bottom: 20px;
+      text-align: center;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 10px;
+      white-space: nowrap;
+    }
+
+    /* --- フォーム要素 --- */
+    .form-group { margin-bottom: 30px; }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: var(--primary-color);
+      line-height: 1.4;
+      word-break: keep-all; 
+      overflow-wrap: normal;
+    }
+
+    .input-label {
+      font-size: 1.0em;
+      color: var(--text-color);
+      margin-bottom: 8px;
+      display: block;
+      line-height: 1.4;
+      font-weight: normal;
+    }
+
+    input[type="text"], input[type="date"], textarea, select {
+      width: 100%;
+      padding: 15px 10px;
+      border: 3px solid var(--border-color); 
+      border-radius: 8px;
+      font-size: 1.2em;
+      box-sizing: border-box;
+      line-height: 1.3;
+      background-color: var(--white-color);
+      max-width: 100%;
+    }
+
+    select.scope-select, select.main-reason-select {
+      font-size: 0.9em;
+      padding: 15px 5px;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      background-color: var(--input-focus-bg) !important;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 10px rgba(0, 64, 152, 0.5);
+    }
+
+    textarea { height: 150px; }
+
+    .input-error {
+      border-color: var(--danger-color) !important;
+      background-color: #fff0f0 !important;
+    }
+    .error-message {
+      color: var(--danger-color);
+      font-size: 0.9em;
+      margin-top: 5px;
+      font-weight: bold;
+    }
+
+    .order-number-group { position: relative; }
+    
+    /* ★修正: 受注番号入力欄のみ、文字サイズを小さく調整 */
+    .order-number-group input[type="text"] {
+      padding-right: 70px;
+      font-size: 1.0em; /* 全体より少し小さく */
+      letter-spacing: -0.05em; /* 文字間隔を少し詰める */
+      font-family: monospace, sans-serif; /* 数字が等幅になるように */
+    }
+
+    .order-number-group .camera-btn {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      font-size: 2.5em;
+      line-height: 1;
+    }
+
+    .customer-name-display {
+      font-size: 1.0em;
+      color: #0056b3;
+      font-weight: bold;
+      margin-top: 8px;
+      padding-left: 5px;
+      min-height: 1.2em;
+    }
+
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      font-weight: normal;
+      font-size: 1.1em;
+      cursor: pointer;
+    }
+    .radio-group input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 50px; height: 50px;
+      border: 3px solid var(--primary-color);
+      border-radius: 50%;
+      margin-right: 15px;
+      position: relative;
+      flex-shrink: 0;
+      background-color: #fff;
+    }
+    .radio-group input[type="radio"]:checked::after {
+      content: ''; display: block;
+      width: 28px; height: 28px;
+      background-color: var(--primary-color);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .report-set {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 3px solid #ddd;
+      border-radius: 10px;
+      background-color: var(--white-color);
+    }
+    
+    .report-set-options {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .report-set-options .option-group { flex: 1; min-width: 140px; }
+    
+    .row-input-section { margin-bottom: 15px; }
+    .row-input-section.hidden { display: none; }
+    .report-set .row-container {
+      background-color: var(--light-gray-bg);
+      padding: 15px;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+    }
+    .report-set .row-input {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+    .report-set .row-input input[type="text"] {
+      width: 80px;
+      text-align: center;
+      padding: 10px;
+    }
+    .report-set .add-next-row-button {
+      display: none;
+      padding: 10px 15px;
+      font-size: 0.9em;
+      border-radius: 6px;
+      border: none;
+      background-color: var(--light-blue-color);
+      font-weight: bold;
+    }
+    .report-set .row-input:last-child .add-next-row-button { display: inline-block; }
+
+    #actionButtonsFixed {
+      position: fixed;
+      bottom: 0; left: 0; width: 100%;
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 8px 15px;
+      box-shadow: 0 -3px 10px rgba(0,0,0,0.15);
+      z-index: 900;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    #actionButtonsFixed .button-common {
+      display: block;
+      width: 100%;
+      max-width: 700px;
+      padding: 6px 10px;
+      font-size: 1.0em;
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      box-sizing: border-box;
+    }
+    #submitReport { background-color: var(--primary-color); color: var(--white-color); }
+    #showSearchPopup {
+      background-color: var(--white-color);
+      border: 2px solid var(--primary-color) !important;
+      color: var(--primary-color);
+    }
+
+    .page-bottom-buttons {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .page-bottom-buttons .button-common {
+      width: 100%; max-width: 700px;
+      padding: 18px 10px;
+      font-size: 1.2em;
+      font-weight: bold;
+      border-radius: 10px;
+      border: none;
+      color: #fff;
+    }
+    #addSetButton { background-color: var(--light-accent-color); }
+    #resetForm { background-color: var(--light-danger-color); }
+
+    .popup-overlay-style {
+      position: fixed; top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center; align-items: center;
+      z-index: 1000;
+      visibility: hidden; opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .popup-overlay-style:not(.hidden) { visibility: visible; opacity: 1; }
+    .popup-content-style {
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 85vh;
+      overflow-y: auto;
+      text-align: center;
+    }
+    .popup-button-area { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
+    .popup-button { padding: 15px 30px; border-radius: 8px; border:none; font-size: 1.1em; font-weight:bold; color:#fff;}
+    .popup-button#executeSearch, .popup-button#confirmYes { background-color: var(--primary-color); }
+    .popup-button.cancel { background-color: #777; }
+
+    /* スキャナー画面 */
+    #scanner-popup {
+      position: fixed;
+      top: 0; left: 0; 
+      width: 100vw; height: 100vh;
+      background-color: #000;
+      z-index: 2000;
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center;
+    }
+    #scanner-video { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover;
+      display: block;
+    }
+    #scanner-overlay-container {
+      position: absolute;
+      top: 0; left: 0; width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: flex; flex-direction: column;
+      justify-content: flex-end; 
+      align-items: center;
+      padding-bottom: 40px;
+    }
+    #scanner-overlay-text {
+      color: #fff; background: rgba(0,0,0,0.6);
+      padding: 10px 20px; border-radius: 8px;
+      margin-bottom: 20px;
+      pointer-events: auto;
+    }
+    #close-scanner {
+      padding: 15px 40px; font-size: 1.2em;
+      background: var(--danger-color); color: #fff; border: none; border-radius: 8px;
+      pointer-events: auto;
+    }
+
+    /* ★非表示クラス */
+    .hidden { display: none !important; }
+    
+    .credit { text-align: center; color: #777; margin-top: 20px; font-size: 0.9em; }
+    
+    #popupResults table { width: 100%; border-collapse: collapse; margin-top:10px;}
+    #popupResults th, #popupResults td { border: 1px solid #ccc; padding: 8px; font-size: 0.9em; }
+    #popupResults th { background: #eee; }
+
+    .hanko-stamp {
+      width: 200px;
+      height: 200px;
+      border: 8px solid #D93A3A; color: #D93A3A;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 60px; font-weight: bold;
+      font-family: "MS Mincho", serif;
+      transform: scale(0) rotate(-15deg); opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+      margin: 20px auto;
+    }
+    .hanko-success .hanko-stamp { transform: scale(1) rotate(-15deg); opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>作業完了報告</h1>
+
+    <div class="form-group">
+      <label for="workDate">完了を報告する日 📅:</label>
+      <input type="date" id="workDate" name="workDate" required>
+    </div>
+
+    <div class="form-group">
+      <label for="staffCode">担当者コード:</label>
+      <input type="text" id="staffCode" name="staffCode" 
+             pattern="^8[0-9]{3,4}$" 
+             title="8から始まる4桁または5桁の数字"
+             placeholder="8xxxx"
+             inputmode="numeric"
+             maxlength="5"
+             required>
+    </div>
+
+    <div class="form-group">
+      <label>本日の工事に変更はありますか？</label>
+      <div class="radio-group notranslate" translate="no">
+        <label><input type="radio" name="hasChange" value="なし" checked> 変更なし</label>
+        <label><input type="radio" name="hasChange" value="あり"> 変更有の場合は下記を記載</label>
+      </div>
+    </div>
+
+    <div id="cancellationDetails" class="hidden">
+      <h2>変更内容詳細</h2>
+      <div id="reportSetsContainer"></div>
+    </div>
+
+    <div class="page-bottom-buttons">
+        <button type="button" id="addSetButton" class="button-common hidden">他受注の変更を報告する</button>
+        <button type="button" id="resetForm" class="button-common">初めから書き直し</button>
+    </div>
+
+    <div class="credit">株式会社 堀内トランスポート</div>
+  </div>
+
+  <div id="actionButtonsFixed">
+    <button type="button" id="submitReport" class="button-common">完了報告を送信 📤</button>
+    <button type="button" id="showSearchPopup" class="button-common">報告を検索</button>
+  </div>
+
+  <div id="popupOverlay" class="hidden popup-overlay-style">
+    <div id="popupContent" class="popup-content-style">
+      <div id="messageBox" class="message-box"><span id="popupMessage"></span></div>
+        <div id="hankoContainer" class="hidden">
+            <div class="hanko-stamp"><span class="hanko-text">完了</span></div>
+            <p id="hankoMessage"></p>
+        </div>
+        <div id="popupResults"></div>
+        <button type="button" id="closePopup" class="popup-button" style="background:var(--primary-color); margin-top:20px;">閉じる</button>
+    </div>
+  </div>
+
+  <div id="searchPopupOverlay" class="hidden popup-overlay-style">
+    <div class="popup-content-style">
+      <h2>報告を検索</h2>
+      <div class="form-group">
+        <label class="input-label">検索日:</label>
+        <input type="date" id="popupSearchDate">
+      </div>
+      <div class="form-group">
+        <label class="input-label">担当者コード:</label>
+        <input type="text" id="popupSearchStaffCode" inputmode="numeric" pattern="^8[0-9]{3,4}$">
+      </div>
+      <div class="popup-button-area">
+        <button type="button" id="executeSearch" class="popup-button">検索実行</button>
+        <button type="button" id="closeSearchPopup" class="popup-button cancel">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmPopupOverlay" class="hidden popup-overlay-style">
+    <div class="popup-content-style">
+      <span id="confirmMessage" style="font-size:1.2em; display:block; margin-bottom:20px;">初めから書き直しますか？</span>
+      <div class="popup-button-area">
+        <button type="button" id="confirmYes" class="popup-button">はい</button>
+        <button type="button" id="confirmNo" class="popup-button cancel">いいえ</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="scanner-popup" class="hidden">
+    <video id="scanner-video" autoplay muted playsinline></video>
+    <div id="scanner-overlay-container">
+        <p id="scanner-overlay-text">バーコードをカメラに向けてください</p>
+        <button id="close-scanner">キャンセル</button>
+    </div>
+  </div>
+
+  <script>
+    // --- JavaScript ---
+    let isFormDirty = false;
+    const formElementsToTrack = ['workDate', 'staffCode'];
+    
+    // 要素取得
+    const cancellationDetails = document.getElementById('cancellationDetails');
+    const reportSetsContainer = document.getElementById('reportSetsContainer');
+    const addSetButton = document.getElementById('addSetButton');
+    const submitButton = document.getElementById('submitReport');
+    const resetButton = document.getElementById('resetForm');
+    const popupOverlay = document.getElementById('popupOverlay');
+    const popupContent = document.getElementById('popupContent');
+    const messageBox = document.getElementById('messageBox');
+    const popupMessage = document.getElementById('popupMessage');
+    const hankoContainer = document.getElementById('hankoContainer');
+    const hankoMessage = document.getElementById('hankoMessage');
+    const popupResults = document.getElementById('popupResults');
+    const closePopup = document.getElementById('closePopup');
+    
+    const showSearchPopupButton = document.getElementById('showSearchPopup');
+    const searchPopupOverlay = document.getElementById('searchPopupOverlay');
+    const executeSearchButton = document.getElementById('executeSearch');
+    const closeSearchPopup = document.getElementById('closeSearchPopup');
+    const confirmPopupOverlay = document.getElementById('confirmPopupOverlay');
+    const confirmYesButton = document.getElementById('confirmYes');
+    const confirmNoButton = document.getElementById('confirmNo');
+
+    const scannerPopup = document.getElementById('scanner-popup');
+    const scannerVideo = document.getElementById('scanner-video');
+    const closeScannerButton = document.getElementById('close-scanner');
+    let codeReader = null;
+    let currentScannerTargetInput = null;
+
+    const maxRows = 50;
+    // ★修正: 報告セクションの最大数を10に設定
+    const maxReportSets = 10;
+    function markFormDirty() { isFormDirty = true; }
+
+    function preparePopup() {
+        popupContent.className = 'popup-content-style';
+        messageBox.classList.remove('hidden');
+        hankoContainer.classList.add('hidden');
+        popupResults.innerHTML = '';
+        popupContent.classList.remove('hanko-success', 'error', 'loading');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const workDateInput = document.getElementById('workDate');
+        if (workDateInput) {
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            workDateInput.value = `${y}-${m}-${d}`;
+        }
+
+        const savedStaffCode = localStorage.getItem('savedStaffCode');
+        if (savedStaffCode) { document.getElementById('staffCode').value = savedStaffCode; }
+
+        const hasChangeRadios = document.querySelectorAll('input[name="hasChange"]');
+        const initialValue = document.querySelector('input[name="hasChange"]:checked').value;
+        toggleChangeDetails(initialValue);
+
+        hasChangeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                toggleChangeDetails(e.target.value);
+                markFormDirty();
+            });
+        });
+
+        const staffCodeInput = document.getElementById('staffCode');
+        staffCodeInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            markFormDirty();
+            if ((this.value.length === 5) || (this.value.length === 4 && /^8/.test(this.value))) {
+               if (/^8[0-9]{3,4}$/.test(this.value)) {
+                   setTimeout(() => { this.blur(); }, 300);
+               }
+            }
+        });
+    });
+
+    function toggleChangeDetails(value) {
+        const isHidden = value === 'なし';
+        cancellationDetails.classList.toggle('hidden', isHidden);
+        addSetButton.classList.toggle('hidden', isHidden);
+        
+        if (isHidden) {
+            // なしの場合はフォームをリセットして1つだけ用意しておく（非表示）
+            reportSetsContainer.innerHTML = '';
+            addReportSet(); 
+        } else {
+            // ありに切り替わった時、もし空なら1つ追加する
+            if (reportSetsContainer.children.length === 0) {
+                addReportSet();
+            }
+        }
+    }
+
+    function addReportSet() {
+        // ★修正: 上限10件のチェック
+        if (reportSetsContainer.children.length >= maxReportSets) {
+            alert('変更報告は最大10件までです。');
+            return;
+        }
+
+        const setIndex = reportSetsContainer.children.length;
+        const newReportSet = document.createElement('div');
+        newReportSet.className = 'report-set';
+        newReportSet.dataset.customerName = "";
+        
+        // ★修正: 区分に「報告だけ」、理由グループに `reason-group` クラスを追加
+        newReportSet.innerHTML = `
+          <label class="input-label" for="orderNumber_${setIndex}">受注番号下６桁を入力<br>又はカメラでQR受注番号を<br>読み取ってください:</label>
+          <div class="order-number-group">
+            <input type="text" name="orderNumber[]" id="orderNumber_${setIndex}" 
+                   pattern="^([0-9]{6}|[0-9]{15})$" 
+                   title="6桁または15桁の数字" maxlength="15" 
+                   inputmode="numeric" placeholder="123456">
+            <button type="button" class="camera-btn">📸</button>
+          </div>
+          <div class="customer-name-display"></div>
+          
+          <div class="report-set-options">
+            <div class="option-group">
+              <label class="input-label">区分:</label>
+              <select name="scope[]" class="scope-select">
+                <option value="" disabled selected>区分を選択</option>
+                <option value="一部">一部</option>
+                <option value="全部">全部</option>
+                <option value="報告だけ">報告だけ</option>
+              </select>
+            </div>
+            <div class="option-group reason-group">
+              <label class="input-label">理由:</label>
+              <select name="mainReason[]" class="main-reason-select">
+                <option value="" disabled selected>理由を選択</option>
+                <option value="日延べ">日延べ</option>
+                <option value="キャンセル">キャンセル</option>
+                <option value="機種変更">機種変更</option>
+                <option value="その他">その他</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="row-input-section">
+            <label class="input-label">行ってない行を記載してください<br>（指示書左側の数字を参照）:</label>
+            <div class="row-container">
+              <div class="row-input">
+                <input type="text" name="cancelRows[${setIndex}][]" pattern="^[0-9]{1,2}$" 
+                       maxlength="2" inputmode="numeric" placeholder="行">
+                <span class="row-suffix"> 行目</span>
+                <button type="button" class="add-next-row-button">次を追加</button>
+              </div>
+            </div>
+          </div>
+          
+          <label class="input-label">詳細コメント:</label>
+          <textarea name="comment[]" rows="3"></textarea>
+        `;
+        reportSetsContainer.appendChild(newReportSet);
+        
+        const orderInput = newReportSet.querySelector('input[name="orderNumber[]"]');
+        orderInput.addEventListener('input', function() {
+             this.value = this.value.replace(/[^0-9]/g, '');
+             if (this.value.length === 15) { this.blur(); }
+             markFormDirty();
+        });
+
+        const scopeSelect = newReportSet.querySelector('.scope-select');
+        scopeSelect.addEventListener('change', function() {
+            toggleRowInputVisibility(this);
+            markFormDirty();
+        });
+
+        toggleRowInputVisibility(scopeSelect);
+    }
+    
+    function checkDuplicateRow(input) {
+        const val = input.value;
+        if (!val) return;
+        
+        const container = input.closest('.row-container');
+        const allInputs = container.querySelectorAll('input[name*="cancelRows"]');
+        let isDupe = false;
+        
+        allInputs.forEach(other => {
+            if (other !== input && other.value === val) {
+                isDupe = true;
+            }
+        });
+        
+        if (isDupe) {
+            preparePopup();
+            popupMessage.textContent = '同じ行が入力されました';
+            popupContent.classList.add('error');
+            popupOverlay.classList.remove('hidden');
+            input.classList.add('input-error');
+            input.value = ''; 
+        } else {
+            input.classList.remove('input-error');
+        }
+    }
+
+    reportSetsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-next-row-button')) {
+            const btn = e.target;
+            const container = btn.closest('.row-container');
+            const currentInputs = container.querySelectorAll('.row-input');
+            
+            if (currentInputs.length >= maxRows) { alert('最大50行までです'); return; }
+            
+            const currentInput = btn.previousElementSibling.previousElementSibling;
+            if (currentInput.value === '') { currentInput.focus(); return; }
+
+            const div = document.createElement('div');
+            div.className = 'row-input';
+            const setIndex = Array.from(reportSetsContainer.children).indexOf(btn.closest('.report-set'));
+            div.innerHTML = `
+                <input type="text" name="cancelRows[${setIndex}][]" pattern="^[0-9]{1,2}$" maxlength="2" inputmode="numeric" placeholder="行">
+                <span class="row-suffix"> 行目</span>
+                <button type="button" class="add-next-row-button">次を追加</button>
+            `;
+            container.appendChild(div);
+            div.querySelector('input').focus();
+        }
+        
+        if (e.target.closest('.camera-btn')) {
+            const input = e.target.closest('.order-number-group').querySelector('input');
+            startScanner(input);
+        }
+    });
+
+    reportSetsContainer.addEventListener('focusout', function(e) {
+        if (e.target.matches('.row-input input')) {
+            const input = e.target;
+            const rowDiv = input.closest('.row-input');
+            const container = rowDiv.closest('.row-container');
+            if (container.querySelectorAll('.row-input').length > 1 && 
+                rowDiv !== container.lastElementChild && input.value === '') {
+                rowDiv.remove();
+            }
+        }
+    });
+
+    reportSetsContainer.addEventListener('change', function(e) {
+         if (e.target.matches('.row-input input')) {
+             checkDuplicateRow(e.target);
+         }
+    });
+
+    addSetButton.addEventListener('click', addReportSet);
+
+    // ★修正: 報告だけ選択時の表示切替（理由・行ってない行を非表示）
+    function toggleRowInputVisibility(selectElement) {
+        const reportSet = selectElement.closest('.report-set');
+        const rowSection = reportSet.querySelector('.row-input-section');
+        const reasonGroup = reportSet.querySelector('.reason-group');
+        const reasonSelect = reportSet.querySelector('.main-reason-select');
+        const inputs = rowSection.querySelectorAll('input');
+        
+        const isAll = selectElement.value === '全部';
+        const isReportOnly = selectElement.value === '報告だけ';
+        
+        // 行入力の表示制御 (全部 or 報告だけ の場合は非表示・無効化)
+        const hideRowInput = isAll || isReportOnly;
+        rowSection.classList.toggle('hidden', hideRowInput);
+        inputs.forEach(input => input.disabled = hideRowInput);
+
+        // 理由選択の表示制御 (報告だけ の場合は非表示・無効化)
+        if (reasonGroup) {
+            reasonGroup.classList.toggle('hidden', isReportOnly);
+            reasonSelect.disabled = isReportOnly;
+        }
+
+        // 非表示時は行入力のDOMをリセットする
+        if (hideRowInput) {
+             const container = rowSection.querySelector('.row-container');
+             container.innerHTML = ''; 
+             const setIndex = Array.from(reportSetsContainer.children).indexOf(reportSet);
+             container.innerHTML = `<div class="row-input"><input type="text" name="cancelRows[${setIndex}][]" disabled><span class="row-suffix"> 行目</span><button type="button" class="add-next-row-button">次を追加</button></div>`;
+        }
+    }
+
+    function showError(input, msg) {
+        const parent = input.closest('.form-group') || input.closest('.report-set') || input.parentElement;
+        const exist = parent.querySelector('.error-message');
+        if (exist) exist.remove();
+        
+        input.classList.add('input-error');
+        const d = document.createElement('div');
+        d.className = 'error-message';
+        d.textContent = msg;
+        
+        if(input.tagName === 'TEXTAREA') {
+            input.parentNode.insertBefore(d, input.nextSibling);
+        } else {
+            parent.appendChild(d);
+        }
+        input.scrollIntoView({behavior:'smooth', block:'center'});
+        input.focus();
+    }
+    
+    function clearAllErrors() {
+        document.querySelectorAll('.input-error').forEach(e => e.classList.remove('input-error'));
+        document.querySelectorAll('.error-message').forEach(e => e.remove());
+    }
+
+    submitButton.addEventListener('click', function() {
+        clearAllErrors();
+        const workDate = document.getElementById('workDate').value;
+        const staffCode = document.getElementById('staffCode').value;
+        const hasChange = document.querySelector('input[name="hasChange"]:checked').value;
+
+        if (!workDate) return showError(document.getElementById('workDate'), '日付を入力してください');
+        if (!staffCode) return showError(document.getElementById('staffCode'), '担当者コードを入力してください');
+        if (!/^8[0-9]{3,4}$/.test(staffCode)) return showError(document.getElementById('staffCode'), '担当者コードが正しくありません(8から始まる数字)');
+
+        let reportData = [];
+        let hasError = false;
+
+        if (hasChange === 'あり') {
+            const sets = document.querySelectorAll('.report-set');
+            sets.forEach((set, i) => {
+                if (hasError) return;
+                const orderNum = set.querySelector('input[name="orderNumber[]"]').value;
+                const scope = set.querySelector('.scope-select').value;
+                const reasonSelect = set.querySelector('.main-reason-select');
+                
+                // ★修正: 報告だけの時は理由は不要なので空文字にする
+                const reason = reasonSelect.disabled ? '' : reasonSelect.value; 
+                const comment = set.querySelector('textarea').value;
+                
+                const rowInputs = set.querySelectorAll('.row-container input:not([disabled])');
+                let rows = [];
+                rowInputs.forEach(inp => { if(inp.value) rows.push(inp.value); });
+
+                if (!orderNum && !scope && !reason && !comment) return;
+                
+                if (!orderNum) { showError(set.querySelector('input[name="orderNumber[]"]'), '受注番号を入力してください'); hasError=true; return; }
+                if (!scope) { showError(set.querySelector('.scope-select'), '区分を選択してください'); hasError=true; return; }
+                
+                // ★修正: 報告だけ 以外の場合は理由を必須にする
+                if (scope !== '報告だけ' && !reason) { 
+                    showError(reasonSelect, '理由を選択してください'); 
+                    hasError=true; return; 
+                }
+
+                if (scope === '一部' && rows.length === 0) {
+                    showError(set.querySelector('.row-input input'), '行ってない行を入力してください');
+                    hasError=true; return;
+                }
+
+                reportData.push({
+                    orderNumber: orderNum,
+                    scope: scope,
+                    mainReason: reason,
+                    cancelRows: rows,
+                    comment: comment,
+                    customerName: set.dataset.customerName || ''
+                });
+            });
+        }
+        
+        if (hasError) return;
+        localStorage.setItem('savedStaffCode', staffCode);
+
+        submitButton.disabled = true;
+        submitButton.textContent = '送信中...';
+        
+        google.script.run
+            .withSuccessHandler(() => {
+                preparePopup();
+                hankoContainer.classList.remove('hidden');
+                popupContent.classList.add('hanko-success');
+                hankoMessage.textContent = '安心してください！送信できました！！';
+                popupOverlay.classList.remove('hidden');
+                submitButton.disabled = false;
+                submitButton.textContent = '完了報告を送信 📤';
+                isFormDirty = false;
+                resetFormFields(); 
+            })
+            .withFailureHandler((e) => {
+                preparePopup();
+                popupContent.classList.add('error');
+                popupMessage.textContent = '送信に失敗しました。';
+                popupOverlay.classList.remove('hidden');
+                submitButton.disabled = false;
+                submitButton.textContent = '完了報告を送信 📤';
+                console.error(e);
+            })
+            .processReport({
+                workDate: workDate,
+                staffCode: staffCode,
+                hasChange: hasChange,
+                reports: reportData
+            });
+    });
+
+    resetButton.addEventListener('click', () => { confirmPopupOverlay.classList.remove('hidden'); });
+    confirmYesButton.addEventListener('click', () => { 
+        resetFormFields(); 
+        confirmPopupOverlay.classList.add('hidden'); 
+    });
+    confirmNoButton.addEventListener('click', () => confirmPopupOverlay.classList.add('hidden'));
+
+    function resetFormFields() {
+        document.getElementById('workDate').value = '';
+        document.getElementById('staffCode').value = '';
+        document.querySelector('input[name="hasChange"][value="なし"]').checked = true;
+        
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        const d = String(today.getDate()).padStart(2, '0');
+        document.getElementById('workDate').value = `${y}-${m}-${d}`;
+        
+        const saved = localStorage.getItem('savedStaffCode');
+        if(saved) document.getElementById('staffCode').value = saved;
+        
+        toggleChangeDetails('なし');
+        clearAllErrors();
+        isFormDirty = false;
+    }
+
+    showSearchPopupButton.addEventListener('click', () => {
+        searchPopupOverlay.classList.remove('hidden');
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        const d = String(today.getDate()).padStart(2, '0');
+        document.getElementById('popupSearchDate').value = `${y}-${m}-${d}`;
+        const saved = localStorage.getItem('savedStaffCode');
+        if(saved) document.getElementById('popupSearchStaffCode').value = saved;
+    });
+    closeSearchPopup.addEventListener('click', () => searchPopupOverlay.classList.add('hidden'));
+    
+    executeSearchButton.addEventListener('click', () => {
+        const date = document.getElementById('popupSearchDate').value;
+        const code = document.getElementById('popupSearchStaffCode').value;
+        if(!date || !code) return alert('検索日と担当者コードを入力してください');
+        
+        searchPopupOverlay.classList.add('hidden');
+        preparePopup();
+        popupMessage.textContent = '検索中...';
+        popupOverlay.classList.remove('hidden');
+        
+        google.script.run
+            .withSuccessHandler(displaySearchResults)
+            .withFailureHandler(() => {
+                popupMessage.textContent = '検索エラー';
+                popupContent.classList.add('error');
+            })
+            .getReports({date: date, staffCode: code});
+    });
+
+    function displaySearchResults(results) {
+        preparePopup();
+        popupMessage.textContent = results.length ? '検索結果' : '該当なし';
+        popupResults.classList.remove('hidden');
+        if (results.length === 0) {
+            popupResults.innerHTML = '<p>報告は見つかりませんでした。</p>';
+            return;
+        }
+        
+        let html = '<table><thead><tr><th>時間</th><th>変更</th><th>受注番号</th><th>区分</th></tr></thead><tbody>';
+        results.forEach(r => {
+            html += `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[4]}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        popupResults.innerHTML = html;
+    }
+    
+    closePopup.addEventListener('click', () => popupOverlay.classList.add('hidden'));
+
+    function startScanner(targetInput) {
+        if (typeof ZXing === 'undefined') { alert('ライブラリ読込エラー'); return; }
+        
+        codeReader = new ZXing.BrowserMultiFormatReader();
+        currentScannerTargetInput = targetInput;
+        
+        scannerPopup.classList.remove('hidden');
+        
+        const constraints = {
+            video: {
+                facingMode: "environment" 
+            }
+        };
+        codeReader.decodeFromConstraints(constraints, 'scanner-video', (res, err) => {
+            if (res) {
+                const txt = res.getText();
+                let code = txt;
+                let name = '';
+                
+                if (txt.includes('||')) {
+                    const parts = txt.split('||')[0].split(',');
+                    if (parts[0]) code = parts[0];
+                    if (parts[2]) name = parts[2];
+                } else {
+                    const m = txt.match(/\d{15}/);
+                    if(m) code = m[0];
+                }
+                
+                currentScannerTargetInput.value = code;
+                const set = currentScannerTargetInput.closest('.report-set');
+                if(name) {
+                    set.dataset.customerName = name;
+                    set.querySelector('.customer-name-display').textContent = `(${name})`;
+                }
+                
+                currentScannerTargetInput.blur(); 
+                stopScanner();
+            }
+        }).catch(err => {
+            console.error(err);
+            if (err.name === 'NotAllowedError' || err.message.includes('Permission denied')) {
+                alert('カメラの許可がありません。\nブラウザの設定でカメラを「許可」にしてから、ページを再読み込みしてください。');
+            } else if (err.name === 'NotFoundError') {
+                alert('カメラが見つかりません。');
+            } else {
+                alert('カメラ起動エラー: ' + err.message);
+            }
+            stopScanner();
+        });
+    }
+    
+    function stopScanner() {
+        if (codeReader) {
+            codeReader.reset();
+            codeReader = null;
+        }
+        scannerPopup.classList.add('hidden');
+    }
+    closeScannerButton.addEventListener('click', stopScanner);
+
+    window.onbeforeunload = (e) => {
+        if(isFormDirty) {
+            e.returnValue = '保存されていません';
+            return '保存されていません';
+        }
+    };
+  </script>
+</body>
+</html>
