@@ -25,32 +25,36 @@
     }
 
     body {
-      font-size: clamp(16px, 6vw, 29px);
+      font-size: clamp(16px, 5vw, 22px);
       font-family: "游ゴシック体", YuGothic, sans-serif;
       margin: 0;
       padding: 0 0 var(--fixed-footer-height-spacer) 0;
       background-color: var(--light-gray-bg);
       color: var(--text-color);
       line-height: 1.5;
-      overflow-x: hidden;
-      width: 100vw;
+      width: 100%;
+      overflow-x: hidden; 
+      box-sizing: border-box;
     }
 
     .container {
       width: 100%;
+      max-width: 100%;
       margin: 0 auto;
       padding: 20px 15px 40px 15px;
       box-sizing: border-box;
     }
 
+    /* タイトル：自然な折り返しを許可し、文字切れを防ぐ */
     h1 {
-      font-size: clamp(1.8rem, 8vw, 3em);
+      font-size: clamp(1.5rem, 6vw, 2.5em);
       text-align: center;
       color: var(--primary-color);
       margin-bottom: 30px;
       font-weight: bold;
-      line-height: 1.2;
-      white-space: nowrap;
+      line-height: 1.3;
+      word-break: keep-all;
+      overflow-wrap: break-word;
     }
 
     h2 {
@@ -61,9 +65,11 @@
       text-align: center;
       border-bottom: 2px solid var(--primary-color);
       padding-bottom: 10px;
-      white-space: nowrap;
+      word-break: keep-all;
+      overflow-wrap: break-word;
     }
 
+    /* --- フォーム要素 --- */
     .form-group { margin-bottom: 30px; }
 
     label {
@@ -73,8 +79,8 @@
       font-size: 1.1em;
       color: var(--primary-color);
       line-height: 1.4;
-      word-break: keep-all; 
-      overflow-wrap: normal;
+      word-break: break-word; 
+      overflow-wrap: break-word;
     }
 
     .input-label {
@@ -91,7 +97,7 @@
       padding: 15px 10px;
       border: 3px solid var(--border-color); 
       border-radius: 8px;
-      font-size: 1.2em;
+      font-size: 1.1em;
       box-sizing: border-box;
       line-height: 1.3;
       background-color: var(--white-color);
@@ -99,7 +105,7 @@
     }
 
     select.scope-select, select.main-reason-select {
-      font-size: 0.9em;
+      font-size: 1em;
       padding: 15px 5px;
     }
 
@@ -123,13 +129,13 @@
       font-weight: bold;
     }
 
-    .order-number-group { position: relative; }
-    
+    .order-number-group { position: relative; width: 100%; }
+
     .order-number-group input[type="text"] {
-      padding-right: 70px;
-      font-size: 1.0em; 
-      letter-spacing: -0.05em; 
-      font-family: monospace, sans-serif; 
+      padding-right: 60px;
+      font-size: 1.0em;
+      letter-spacing: -0.05em;
+      font-family: monospace, sans-serif;
     }
 
     .order-number-group .camera-btn {
@@ -141,8 +147,9 @@
       border: none;
       cursor: pointer;
       padding: 10px;
-      font-size: 2.5em;
+      font-size: 2.0em;
       line-height: 1;
+      z-index: 10;
     }
 
     .customer-name-display {
@@ -154,21 +161,24 @@
       min-height: 1.2em;
     }
 
+    /* ラジオボタン：文字が改行されても中央にズレないように調整 */
     .radio-group label {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: 20px;
       font-weight: normal;
       font-size: 1.1em;
       cursor: pointer;
+      line-height: 1.4;
     }
     .radio-group input[type="radio"] {
       appearance: none;
       -webkit-appearance: none;
-      width: 50px; height: 50px;
+      width: 50px; height: 50px; 
       border: 3px solid var(--primary-color);
       border-radius: 50%;
       margin-right: 15px;
+      margin-top: 2px;
       position: relative;
       flex-shrink: 0;
       background-color: #fff;
@@ -185,25 +195,32 @@
 
     .report-set {
       margin-bottom: 30px;
-      padding: 20px;
+      padding: 15px;
       border: 3px solid #ddd;
       border-radius: 10px;
       background-color: var(--white-color);
+      width: 100%;
+      box-sizing: border-box;
     }
-    
+
+    /* 選択項目：狭い画面では確実に縦に折り返されるように調整 */
     .report-set-options {
       display: flex;
-      gap: 15px;
+      gap: 10px;
       margin-bottom: 20px;
-      flex-wrap: wrap;
+      flex-wrap: wrap; 
     }
-    .report-set-options .option-group { flex: 1; min-width: 140px; }
-    
+    .report-set-options .option-group { 
+      flex: 1 1 130px; 
+      min-width: 130px; 
+    }
+
     .row-input-section { margin-bottom: 15px; }
     .row-input-section.hidden { display: none; }
+
     .report-set .row-container {
       background-color: var(--light-gray-bg);
-      padding: 15px;
+      padding: 10px;
       border-radius: 8px;
       border: 2px solid #ddd;
     }
@@ -211,21 +228,23 @@
       display: flex;
       align-items: center;
       margin-bottom: 15px;
-      gap: 10px;
+      gap: 5px;
+      flex-wrap: wrap; 
     }
     .report-set .row-input input[type="text"] {
-      width: 80px;
+      width: 60px;
       text-align: center;
-      padding: 10px;
+      padding: 10px 5px;
     }
     .report-set .add-next-row-button {
       display: none;
-      padding: 10px 15px;
+      padding: 10px 10px;
       font-size: 0.9em;
       border-radius: 6px;
       border: none;
       background-color: var(--light-blue-color);
       font-weight: bold;
+      white-space: nowrap;
     }
     .report-set .row-input:last-child .add-next-row-button { display: inline-block; }
 
@@ -242,11 +261,12 @@
       align-items: center;
       gap: 6px;
     }
+
     #actionButtonsFixed .button-common {
       display: block;
       width: 100%;
       max-width: 700px;
-      padding: 6px 10px;
+      padding: 15px 10px; 
       font-size: 1.0em;
       font-weight: bold;
       border-radius: 8px;
@@ -268,11 +288,12 @@
       flex-direction: column;
       align-items: center;
       gap: 20px;
+      padding-bottom: 20px;
     }
     .page-bottom-buttons .button-common {
       width: 100%; max-width: 700px;
-      padding: 18px 10px;
-      font-size: 1.2em;
+      padding: 18px 10px; 
+      font-size: 1.1em;
       font-weight: bold;
       border-radius: 10px;
       border: none;
@@ -293,18 +314,20 @@
       transition: opacity 0.3s;
     }
     .popup-overlay-style:not(.hidden) { visibility: visible; opacity: 1; }
+
     .popup-content-style {
       background-color: #fff;
-      padding: 25px;
+      padding: 20px;
       border-radius: 15px;
       width: 90%;
       max-width: 600px;
       max-height: 85vh;
       overflow-y: auto;
       text-align: center;
+      box-sizing: border-box;
     }
-    .popup-button-area { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
-    .popup-button { padding: 15px 30px; border-radius: 8px; border:none; font-size: 1.1em; font-weight:bold; color:#fff;}
+    .popup-button-area { margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .popup-button { padding: 12px 25px; border-radius: 8px; border:none; font-size: 1.0em; font-weight:bold; color:#fff;}
     .popup-button#executeSearch, .popup-button#confirmYes { background-color: var(--primary-color); }
     .popup-button.cancel { background-color: #777; }
 
@@ -312,7 +335,7 @@
     #scanner-popup {
       position: fixed;
       top: 0; left: 0; 
-      width: 100vw; height: 100vh;
+      width: 100%; height: 100%;
       background-color: #000;
       z-index: 2000;
       display: flex; 
@@ -341,28 +364,31 @@
       padding: 10px 20px; border-radius: 8px;
       margin-bottom: 20px;
       pointer-events: auto;
+      text-align: center;
+      width: 80%;
     }
     #close-scanner {
-      padding: 15px 40px; font-size: 1.2em;
+      padding: 15px 40px;
+      font-size: 1.2em;
       background: var(--danger-color); color: #fff; border: none; border-radius: 8px;
       pointer-events: auto;
     }
 
     .hidden { display: none !important; }
-    
     .credit { text-align: center; color: #777; margin-top: 20px; font-size: 0.9em; }
-    
+
     #popupResults table { width: 100%; border-collapse: collapse; margin-top:10px;}
-    #popupResults th, #popupResults td { border: 1px solid #ccc; padding: 8px; font-size: 0.9em; }
+    #popupResults th, #popupResults td { border: 1px solid #ccc; padding: 5px; font-size: 0.85em; }
     #popupResults th { background: #eee; }
 
     .hanko-stamp {
-      width: 200px;
-      height: 200px;
-      border: 8px solid #D93A3A; color: #D93A3A;
+      width: 150px;
+      height: 150px;
+      border: 6px solid #D93A3A; color: #D93A3A;
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 60px; font-weight: bold;
+      display: flex;
+      align-items: center; justify-content: center;
+      font-size: 40px; font-weight: bold;
       font-family: "MS Mincho", serif;
       transform: scale(0) rotate(-15deg); opacity: 0;
       transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
@@ -466,7 +492,7 @@
   </div>
 
   <script>
-    // ★お客様のGAS WebアプリURLをここに設定します
+    // ★通信先GASのURL
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby-JjmXn6fktJ4fGg34iUPadhux-MdFDxp_ei83XgWLiW-xdnArfQc2I6DwT0tox0y9/exec';
 
     let isFormDirty = false;
@@ -767,6 +793,7 @@
         document.querySelectorAll('.error-message').forEach(e => e.remove());
     }
 
+    // データ送信処理
     submitButton.addEventListener('click', function() {
         clearAllErrors();
         const workDate = document.getElementById('workDate').value;
@@ -789,6 +816,7 @@
                 const reasonSelect = set.querySelector('.main-reason-select');
                 
                 const reason = reasonSelect.disabled ? '' : reasonSelect.value; 
+                // 個別コメントを取得
                 const comment = set.querySelector('textarea').value;
                 
                 const rowInputs = set.querySelectorAll('.row-container input:not([disabled])');
@@ -815,7 +843,7 @@
                     scope: scope,
                     mainReason: reason,
                     cancelRows: rows,
-                    comment: comment,
+                    comment: comment, // コメントをデータに格納
                     customerName: set.dataset.customerName || ''
                 });
             });
@@ -827,7 +855,6 @@
         submitButton.disabled = true;
         submitButton.textContent = '送信中...';
         
-        // ★修正: デスクトップファイル用に fetch 通信を使用（CORS回避のため text/plain で送信）
         const payload = {
             workDate: workDate,
             staffCode: staffCode,
@@ -835,6 +862,7 @@
             reports: reportData
         };
 
+        // CORS回避のため text/plain で送信
         fetch(WEB_APP_URL, {
             method: 'POST',
             headers: {
@@ -907,6 +935,7 @@
     });
     closeSearchPopup.addEventListener('click', () => searchPopupOverlay.classList.add('hidden'));
     
+    // データ検索処理
     executeSearchButton.addEventListener('click', () => {
         const date = document.getElementById('popupSearchDate').value;
         const code = document.getElementById('popupSearchStaffCode').value;
@@ -917,7 +946,6 @@
         popupMessage.textContent = '検索中...';
         popupOverlay.classList.remove('hidden');
         
-        // ★修正: デスクトップファイル用に fetch 通信を使用
         const targetUrl = `${WEB_APP_URL}?action=search&date=${date}&staffCode=${code}`;
         
         fetch(targetUrl)
